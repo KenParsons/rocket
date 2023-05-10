@@ -11,6 +11,10 @@ fn index(name: Option<&str>, cookies: &CookieJar<'_>) -> String {
             name => format!("Message from {}: ", name),
         },
     };
+    
+    if let Some(cookie) = cookies.get("server_message") {
+        println!("{}", cookie.value())
+    }
 
     match cookies.get("message") {
         None => format!("No message!"),
