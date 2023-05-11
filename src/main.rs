@@ -1,28 +1,11 @@
-use rocket::http::CookieJar;
-#[macro_use]
-extern crate rocket;
+use axum::{routing::get, Router};
 
-#[get("/?<name>")]
-fn index(name: Option<&str>, cookies: &CookieJar<'_>) -> String {
-    let intro: String = match name {
-        None => "Message: ".to_string(),
-        Some(name) => match name {
-            "" => "Message: ".to_string(),
-            name => format!("Message from {}: ", name),
-        },
-    };
-    
-    if let Some(cookie) = cookies.get("server_message") {
-        println!("{}", cookie.value())
-    }
+#[tokio::main]
+async fn main() {
+    let app = Router::new().route("/", get(|| async { "Hello, world!" }));
 
-    match cookies.get("message") {
-        None => format!("No message!"),
-        Some(message_cookie) => format!("{}{}", intro, message_cookie.value()),
-    }
-}
-
-#[launch]
-fn rocket() -> _ {
-    rocket::build().mount("/", routes![index])
+    axum::Server::bind(&"0.0.0.0:3000".parse().unwrap())
+        .serve(app.into_make_service())
+        .await
+        .unwrap();
 }
